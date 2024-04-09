@@ -1,0 +1,609 @@
+create database; -> é pra criar um novo banco de dados
+create table ->  criar tabela.
+DROP DATABASE nome do banco de dados = é pra apagar um banco de dados
+psql -U postgres -l para ver todas as tabelas criadas/existentes
+\x aparece só a quantidade de registro
+quando fizer um update e delete é bom usar o begin; e o commit no final
+\l -> para mostrar os bancos de dados disponiveis
+ROLLBACK; é usado para cancelar a transação atual
+drop database -> é pra excluir um banco de dados
+https://www.postgresql.org/docs/current/ -> documentação de banco de dados
+
+Exemplo de tipos mais usados: 
+
+CREATE DATABASE aluno(
+    id SERIAL, //vai ser inserido automaticamente
+    nome VARCHAR(255), //é 
+    cpf CHAR(11),
+    observacao TEXT, /texto sem limite
+    idade INTEGER, 
+    dinheiro NUMERIC (20,2), //20 carater e 2 casas decimais
+    altura REAL, //com ponto flutuante
+    ativo BOOLEAN, //tipo true or false
+    data_nascimento DATE, //é do tipo data
+    hora_aula TIME,
+)
+SELECT * FROM aluno; //esta selecionando o banco de dados aluno
+
+para inserir dados na tabela:
+//é o jeito mais comum
+INSERT INTO nome da tabela (campos da tabela)
+    string VALUES (os valores que precisam);
+
+Exemplo:
+
+INSERT INTO aluno (
+    nome, 
+    cpf,
+    observacao,
+    idade,
+    dinheiro,
+    altura,
+    ativo,
+    data_nascimento,
+    hora_aula, 
+    matriculado_em
+) 
+    VALUES (
+        'Júlia', 
+        12345678911,
+        'Lorem ipsum dolor sit amet. Et perferendis',
+        21,
+        1.578.30,
+        1.63,
+        TRUE,
+        '2002-05-19', //formato de data de nascimento YYYY-MM-DD
+        '17:30:55' //formato de horas hora:minutos:segundos
+        '2024-04-01 13:00:00' //dia e hora 
+
+);
+
+Atualizando um registro na tabela, usa:
+ UPDATE nome da tabela SET nome do campo pra att ='o que vai ser alterado'
+     WHERE nome do campo pra att = 'conteudo pra atualizar'
+pra evitar de fazer uma atualização em toda a tabela, faz um SELECT com WHERE:
+    SELECT * FROM nome da tabela 
+    WHERE  fazer um filtro de qual registro vamos querer
+
+
+EXEMPLO:
+
+SELECT * FROM aluno //esta filtrando e pegando somente um id
+WHERE id = 1;
+agora alteração do dado
+
+UPDATE aluno 
+    SET nome = 'Marina', 
+    cpf = '11987654321',
+    observacao = 'Non aliquid recusandae in officiis pariatur et corporis expedita sed Quis amet. Id earum quia quo impedit laborum ut eveniet unde.',
+    idade = '12',
+    dinheiro = '1.500',
+    altura = 1.50,
+    ativo = FALSE,
+    data_nascimento = '2011-11-07',
+    hora_aula '07:30:00',  
+    matriculado_em = '2024-01-01 17:30:24'
+WHERE id =1;
+
+Excluir um registro da tabela:
+DELETE FROM nome da tabela
+WHERE com condição
+é bom fazer um select antes só pra garanti que é esse registro mesmo
+EXEMPLO:
+
+SELECT * 
+    FROM aluno
+WHERE nome = 'Marina';
+
+DELETE 
+    FROM aluno 
+WHERE nome = 'Marina';
+
+Selecionando colunas especificas da tabela:
+
+(partindo da ideia de que todos os registros estão salvos)
+SELECT nome da coluna(s)
+FROM nome da tabela;
+
+mudando o nome de um campo: 
+
+SELECT  nome, 
+        idade, 
+        matriculado_em AS quando_se_matriculou //mudando o nome
+FROM    aluno;
+
+situações que pedem relatorios: mudando o nome da coluna para um nome que tem espaço
+
+SELECT  nome AS "Nome do Aluno", 
+FROM    aluno;
+
+
+Filtrando registros de campos do tipo texto:
+//inserindo dados na tabela aluno e coluna nome
+INSERT INTO aluno (nome) VALUES ('Vinicius Dias')
+INSERT INTO aluno (nome) VALUES ('Nico Silva')
+INSERT INTO aluno (nome) VALUES ('Patrick Mattos')
+INSERT INTO aluno (nome) VALUES ('Ricardo Morais')
+
+
+o "=" é quando querendo pesquisar exatamente o texto 
+EXEMPLO SELECT * FROM aluno WHERE nome = 'Patrick'
+
+o "<>" é para pesquisar tudo aquilo que você difrente 
+EXEMPLO SELECT * FROM aluno WHERE nome <> 'Patrick', ou seja, 
+eu quero todos os nomes que não são chamados de Patrick
+
+o "!=" também é diferente. é a mesma coisa
+
+o "LIKE" é um operador especial que funciona como se fosse parecido 
+EXEMPLO SELECT * FROM aluno WHERE nome LIKE 'Patrick'
+no LIKE pode ter: 
+    '_atrick' = qualquer carater daquele item
+    com o "_" é preciso tirar uma letra do nome pra poder encontrar
+    '_&Patrick'
+o NOT LIKE é como se fosse um diferente, então trás aquilo que é diferente 
+EXEMPLO SELECT * FROM aluno WHERE nome NOT LIKE 'Patrick'
+aqui vai trazer outros nomes
+
+o caractere % , que substitui todos os caracteres até o espaço que ele ocupa. Por exemplo, para recuperar todos os nomes que comecem com "D",
+ usamos o comando
+
+EXEMPLO SELECT * FROM aluno WHERE nome LIKE 'D%';
+ ou 
+ SELECT * FROM aluno WHERE nome LIKE '% %'; //mnais pra nome composto ou que tenha espaço entre um nome e o outro
+ Esse filtro ignora quaisquer nomes estejam antes ou depois do espaço
+
+
+FILTRANDO REGISTROS DE CAMPOS DO TIPO NUMERICO, DATA E BOOLEANO
+generico
+quando trabalhamos com NULL precisa colocar o IS NOT na frente
+EXEMPLO SELECT * FROM aluno WHERE cpf IS NOT NULL;
+ai vai mostrar todo aquele que tem (se tiver só o IS NULL n vai retornar nada)
+
+o >= , que filtra resultados maiores ou iguais ao valor que declaramos
+
+EXEMPLO SELECT * FROM aluno WHERE idade >=35;
+
+ o <=, que retorna os dados menores ou iguais ao valor declarado.
+ EXEMPLO SELECT * FROM aluno WHERE idade <=35;
+
+Tem o filtro > , que retorna apenas os resultados maiores que o valor declarado, e o < , que retorna apenas os resultados menores que o valor declarado
+
+o operador BETWEEN , que procura resultados entre dois valores declarados.
+SELECT * FROM aluno WHERE idade BETWEEN 10 AND 21;
+os resultados que incluem esses números também aparecem na nossa busca.
+
+OPERADORES AND E OR 
+and = é valido quando as duas condições são validas/ retornam verdadeiro
+EXEMPLO SELECT * FROM aluno WHERE nome LIKE '%patrick' AND nome LIKE 'Mattos%'
+começar com patrick e terminar com mattos pra trazer resultado
+or = é quando um das condições são validas/verdadeiras 
+EXEMPLO SELECT * FROM aluno WHERE nome LIKE 'Patrick'
+OR nome LIKE 'diogo' OR nome LIKE 'Júlia';
+
+
+CRIANDO TABELA COM CHAVE PRIMARIA 
+
+
+a chave primaria é o identificador único de um registro na tabela.
+não da pra criar duas colunas ou itens com o mesmo id
+
+EXEMPLO CREATE TABLE contatos (
+    telefone VARCHAR(15) PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL
+);
+CHAVE PRIMARIA COMPOSTA
+
+EXEMPLO CREATE TABLE aluno_curso (
+    aluno_id INTEGER,
+    curso_id INTEGER,
+    PRIMARY KEY (aluno_id, curso_id)
+);
+INSERT INTO aluno_curso (aluno_id, curso_id) VALUES (1,1)
+conseguiremos adicionar o curso e o aluno com "id = 1", mas se tentarmos executar o mesmo código pela segunda vez, receberemos a mensagem de erro. Portanto nossa chave primária não permite que o mesmo aluno seja matriculado no mesmo curso duas vezes.
+
+CHAVES ESTRANGEIRA
+
+é melhor criar a chave estrangeira referencia a chave primaria
+
+EXEMPLO categoria_id INTEGER NOT NULL REFERENCES categoria(id) //chave primaria
+Então sempre é interessante que utilizemos a referência para uma chave primária, mas funciona se referenciarmos um campo que tenha a validação UNIQUE , ou seja, um campo único.
+é a chave que permite a referência a registros oriundos de outras tabelas. 
+Ou seja, é o campo ou conjunto de campos que compõem a chave primária de uma outra tabela.
+
+EXEMPLO FOREIGN KEY (curso_id)
+        REFERENCES curso (id) 
+
+JUNTAR AS TABELAS EM UMA CONSULTA
+
+o operador JOIN faz a junção das tabelas
+EXEMPLO SELECT * FROM aluno JOIN aluno_curso ON aluno_curso.aluno_id = aluno.id
+//concatenou as informações das tabelas "aluno" e "aluno_curso" de forma correspondente
+//ON é utilizado quando se tem nomes de colunas diferentes ou iguais entre as tabelas
+
+
+LEFT, RIGHT, CROSS, FULL JOINS
+
+INNER JOIN compara cada linha da tabela A com as linhas da tabela B para encontrar todos os pares de linhas que satisfazem a condição de junção
+
+LEFT JOIN retorna todos os registros da tabela esquerda e os registros correspondentes da tabela direita
+//O primeiro comando é o LEFT JOIN , que significa que existe um dado na tabela da esquerda, mas não existe na tabela da direita.
+
+SELECT aluno.nome as "Nome do Aluno",
+        curso.nome as "Nome do Curso"
+    FROM aluno
+LEFT JOIN aluno_curso ON aluno_curso.aluno_id = aluno.id
+LEFT JOIN curso ON curso.id = aluno_curso.curso_id
+
+FULL JOIN que irá considerar todos os dados, mesmo que o campo da direita ou o campo da esquerda esteja nulo.
+
+EXEMPLO SELECT aluno.nome as "Nome do Aluno",
+        curso.nome as "Nome do Curso"
+    FROM aluno
+FULL JOIN aluno_curso ON aluno_curso.aluno_id = aluno.id
+FULL JOIN curso ON curso.id = aluno_curso.curso_id
+
+CROSS JOIN retorna todas as linhas das tabelas por cruzamento, ou seja, para cada linha da tabela esquerda queremos todos os linhas da tabelas direita ou vice-versa
+EXEMPLO SELECT aluno.nome as "Nome do Aluno",
+       curso.nome as "Nome do Curso"
+    FROM aluno
+CROSS JOIN curso
+
+DELETE CASCADE 
+
+Quando um registro é excluído de uma tabela que possui uma relação de chave estrangeira com outras tabelas, o "CASCADE" garante que os registros relacionados nessas outras tabelas também sejam excluídos automaticamente.
+
+EXEMPLO CREATE TABLE aluno_curso (
+    aluno_id INTEGER,
+    curso_id INTEGER,
+    PRIMARY KEY (aluno_id, curso_id),
+
+    FOREIGN KEY (aluno_id)
+     REFERENCES aluno (id)
+     ON DELETE CASCADE,
+
+    FOREIGN KEY (curso_id)
+     REFERENCES curso (id)
+
+);
+
+
+ON DELETE CASCADE =! ON DELETE RESTRICT
+
+o DELETE RESTRICT = chave estrangeira restringe o apagamento de dados que estão em duas tabelas. 
+DELETE CASCADE = sempre que apagarmos um dado de um banco, o registro será apagado de todas as tabelas que o contém, ou seja, quando apagarmos o dado do aluno, ele também será excluído do curso.
+ou seja, quando se deleta de uma tabela, na outra tambem
+e o DROP TABLE (nome do curso) é quando deletamos um banco de dados completo
+
+
+UPDATE CASCADE
+
+quando alterarmos o dado em alguma tabela, ele também será alterado em todos os bancos relacionados entre si
+
+
+EXEMPLO CREATE TABLE aluno_curso (
+    aluno_id INTEGER,
+        curso_id INTEGER,
+        PRIMARY KEY (aluno_id, curso_id),
+
+        FOREIGN KEY (aluno_id)
+         REFERENCES aluno (id)
+         ON DELETE CASCADE
+         ON  UPDATE CASCADE,
+
+        FOREIGN KEY (curso_id)
+         REFERENCES curso (id)
+
+);
+
+quando já tem o id definido, não tem como mudar
+é possível alterar um ID que já foi definido, desde que a tabela em questão esteja relacionada a outras tabela
+
+ou seja, se tiver uma alteração na tabela de alunos, vai ter um update na tabela aluno_curo. 
+Sendo então, quando se tem um update em um, tem update em outra
+
+
+ORDENANDO AS CONSULTAS 
+
+order by para definir uma ordem para os dados aparecerem na busca
+ORDE BY nome_do_campo
+
+por ordem descrecente = ORDE BY nome_do_campo DESC 
+
+ordenar por dois campos: 
+ 
+order by nome_do_campo, nome_do_campo
+
+pode colocar o desc no final tambem
+
+order by por posição:
+
+tem como ordenar por posição, só contar as colunas e colocar
+exemplo: tem quatro colunas, e a ultima é spor sobrenome, então coloca:
+    SELECT * FROM funcionarios ORDER BY 4 (quatro colunas, na 4° coluna é sobrenome)
+
+
+ORDER BY crescente é: 
+
+order by nome_do_campo ASC
+
+Quando se tem nomes de tabela e colunas duplicados, é só colocar o nome_da_tabela.nome_da_coluna
+EXEMPLO  SELECT * FROM funcionarios ORDER BY 4 DESC, funcionarios.nome DESC, 2 ASC
+
+
+LIMITANDO AS CONSULTAS 
+
+se faz quando tem mt registros na tabela
+só colocar o "LIMIT valor_que_precisa" no fim do SELECT
+ EXEMPLO SELECT * FROM funcionarios LIMIT 1;
+
+Quer colocar limit junto com order by:
+
+SELECT * FROM funcionarios ORDER BY nome LIMIT 5;
+
+
+FUNÇÃO DE AGREGAÇÃO:
+
+são funções que podemos agrupar em um unico registro 
+os mais usados: 
+COUNT - Retorna a quantidade de registros
+SUM -   Retorna a soma dos registros
+MAX -   Retorna o maior valor dos registros
+MIN -   Retorna o menor valor dos registros
+AVG -   Retorna a média dos registros
+
+
+GRUPANDO CONSULTAS: 
+
+listar todos os nomes sem repetição 
+SELECT DISTINCT, nome FROM funcionarios ORDER By nome;
+DISTINCT faz com que os nomes não se repitam 
+
+quando  precisa usar uma função de agrupação, podemos usar o GROUP BY
+é um agrupamento para realização de buscas com funções de agregação
+
+EXEMPLO 
+SELECT
+       nome,
+       sobrenome,
+       COUNT(*)
+  FROM funcionarios
+  GROUP BY nome, sobrenome
+  ORDER BY nome;
+
+
+
+exemplo de agrupamento com função de agregação 
+SELECT curso.nome
+        COUNT(aluno.id)
+    FROM aluno
+    JOIN aluno_curso ON aluno.id = aluno_curso.aluno_id
+    JOIN curso ON curso.id = aluno_curso.curso_id
+    GROUP BY 1
+    ORDER BY 1
+Esse comando é uma consulta SQL que tem como objetivo contar a quantidade de alunos por curso. 
+A instrução SELECT é usada para selecionar os campos que queremos exibir no resultado da consulta. 
+No caso, estamos selecionando o campo curso.nome e o resultado da contagem de alunos, que é feita com a função COUNT(aluno.id). 
+A parte FROM aluno indica que estamos selecionando dados da tabela aluno. Em seguida, temos JOIN aluno_curso ON aluno.id = aluno_curso.aluno_id, que significa que estamos juntando a tabela aluno com a tabela aluno_curso usando a condição em que o id do aluno é igual ao aluno_id na tabela aluno_curso.
+Depois, temos JOIN curso ON curso.id = aluno_curso.curso_id, que junta a tabela curso com a tabela aluno_curso usando a condição em que o id do curso é igual ao curso_id na tabela aluno_curso.A parte GROUP BY 1 indica que queremos agrupar os resultados pelo primeiro campo selecionado na instrução SELECT, que no caso é curso.nome. 
+E, por fim, ORDER BY 1 é usado para ordenar o resultado de acordo com o primeiro campo selecionado na instrução SELECT. 
+
+FILTRANDO CONSULTAS AGRUPADAS
+
+Sempre que aplicarmos um agrupamento na busca, é necessário codarmos o comando GROUP BY nome_ou_posição_do_cam
+EXEMPLO: SELECT *
+        COUNT (aluno.id)
+    FROM curso
+    LEFT JOIN aluno_curso ON aluno.curso_id = curso.id
+    LEFT JOIN aluno ON aluno.id = aluno_curso.aluno_id
+GROUP BY 1
+
+A função chamada HAVING funciona exatamente como o WHERE, ela faz o filtro
+ela é utilizada quando se quer usar a função de agrupamento
+
+EXEMPLO funcionario duplicado 
+SELECT nome, //nome da tabela
+       COUNT(id) //quantas duplicações tem
+    FROM funcionarios
+    GROUP BY nome //agrupa as linhas q tem o mesmo valor
+    HAVING COUNT(id) > 1; //faz o filtro
+
+TIPOS DE RELACIONAMENTOS 
+
+-muitos para muitos: uma tabela pode esta em varias tabelas 
+exemplo: o mesmo aluno pode ta em muitos cursos, e o mesmo curso pode ter varios alunos
+necessário criar uma tabela de junção, que vai representar essa relação entre as tabelas 
+Essa tabela de junção vai conter as chaves estrangeiras que fazem referência às tabelas
+
+-de um para muitos: não precisa de tabela de junção. 
+um registro em uma tabela está relacionado a vários registros em outra tabela
+EXEMPLO: tabela de categoria e curso, varios cursos podem pertencer à mesma categoria, mas um curso só tem uma categoria
+é onde um lado possui varios registros relacionados no outro curso, mas o outro lado está relacionado a apenas um registro
+
+PREPARANDO DADOS:
+
+pode inserir os dados de uma vez, coloca o values (conteudo para inserir), (conteudo para inserir);
+
+
+CRIAÇÃO DE UM RELATORIO:
+
+EXEMPLO: relação de quais cursos as pessoas estão fazendo 
+
+SELECT *
+    FROM aluno
+    JOIN aluno_curso ON aluno_curso.aluno_id = aluno.id
+    JOIN curso ON curso.id = aluno_curso.curso_id;
+se a pessoa só quer saber quais os alunos q estão fazendo os cursos, então:
+
+SELECT aluno.primeiro_nome,
+       aluno.ultimo_nome,
+       COUNT(curso.id) numero_cursos
+    FROM aluno
+    JOIN aluno_curso ON aluno_curso.aluno_id = aluno.id
+    JOIN curso ON curso.id = aluno_curso.curso_id
+GROUP BY aluno.primeiro_nome, aluno.ultimo_nome -- (aqui pode ter GROUP BY 1,2 -- é mais visto assim)
+--group by vai sempre agrupar os campos antes da função de agregação 
+ORDER BY numero_curso DESC
+    LIMIT 1;
+
+PASSA A PASSO PRA SABER O CURSO MAIS REQUISITADOS:
+
+para saber quais são os cursos: processo real de uma criação de um relatorio
+    SELECT * FROM curso;
+acessar cursos que tem alunos matriculados, informando o criterio de junção:
+    SELECT * FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id;
+OBS:se quisermos todos os cursos mesmo aqueles sem ngm:
+    --SELECT * FROM curso LEFT JOIN aluno_curso ON aluno_curso.curso_id = curso.id;
+saber o nome dos cursos:
+    SELECT curso.nome, FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id;
+saber o numero de alunos matriculados nesse curso:
+    SELECT curso.nome, COUNT (aluno_curso.aluno_id) numero_alunos FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id;
+vai da erro pq se tem uma função de agregação, precisa agrupar pelo curso.nome:
+    SELECT curso.nome, COUNT (aluno_curso.aluno_id) numero_alunos FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id GROUP BY curso.nome --ou pelo 1;
+ate aqui temos o nome do curso e quantos alunos neles
+ordenar pelo numero de alunos de forma descrecente: 
+        SELECT curso.nome, 
+            COUNT (aluno_curso.aluno_id) numero_alunos
+         FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id 
+         GROUP BY curso.nome 
+         ORDER BY numero_aluno DESC;
+se quiser apenas o curso com mais alunos:
+    SELECT curso.nome, 
+            COUNT (aluno_curso.aluno_id) numero_alunos
+         FROM curso JOIN aluno_curso ON aluno_curso.curso_id = curso.id 
+         GROUP BY curso.nome 
+         ORDER BY numero_aluno DESC
+         LIMIT 1;
+
+OPERADOR IN:
+
+IN: verifica se um campo especifico em um banco de dados é igual a qualquer um dos valores da lista
+se o campo for igual a qualquer um dos valores, o resultado será retornado
+ou seja, para cada item da lista, lá dentro do in, ele vai comparar utilizando o operador de = 
+
+QUERIES ANINHADAS: SELECT aninhados: Subquery
+
+é quando precisa incluir outra instrução SELECT dentro da sua instrução principal
+ou seja, é uma consulta dentro de uma consulta
+
+EXEMPLO
+
+buscar todas as categorias, onde no nome da categoria eu n tenha espaço 
+    SELECT id FROM categoria WHERE nome NOT LIKE '% %';
+    SELECT * FROM curso WHERE categoria_id IN (1,2)
+vai retornar as categorias que não tem espaço.
+
+pode ficar assim: 
+    SELECT * FROM curso WHERE categoria_id IN (
+        SELECT id FROM categoria WHERE nome NOT LIKE '% %');
+
+Dentro do FROM podemos ter uma subquery, ai precisa dar nome a tabela
+
+    SELECT categoria,
+    FROM (
+            SELECT categoria.nome AS categoria,
+                COUNT(curso.id) as numero_cursos
+            FROM categoria
+            JOIN curso ON curso.categoria_id = categoria.id
+        GROUP BY categoria
+    ) AS categoria_cursos
+  WHERE numero_cursos > 3;
+
+ou seja, existe uma possibidade de usar uma query como se fosse uma tabela e não só como um filtro
+
+esse tipo de solução pode ser implementado de uma forma mais simples: 
+    SELECT categoria.nome AS categoria, 
+    COUNT(curso.id) as numero_cursos 
+FROM categoria 
+JOIN curso ON curso.categoria_id = categoria.id 
+GROUP BY categoria 
+HAVING COUNT(curso.id) > 3;
+
+
+FUNÇÕES DE STRINGS: só para postgresql
+
+SELECT (primeiroNome juntar com ultimo_nome) AS nome_completo FROM aluno;
+
+esse "juntar com" vira:
+
+SELECT (primeiroNome || ultimo_nome) AS nome_completo FROM aluno;
+"||" junta as strings sem espaço 
+
+para juntar com espaço:
+
+SELECT (primeiroNome || ' ' || ultimo_nome) AS nome_completo FROM aluno;
+
+se colocar "NULL" pra unir os dados, o resultado vai dar NULL
+
+SELECT 'Vinicius' || ' ' || 'Dias';
+resultado: NULL;
+
+CONCAT (concatenação): ignorar o null e juntar 'nome' com espaço ||
+
+EXEMPLO: SELECT CONCAT('Vinicus' || ' ' || 'Dias');
+
+TRIM: remover todos os espaços do início e do fim
+
+SELECT TRIM(UPPER(CONCAT('Vinicius', NULL, 'Dias') || ' '));
+--UPPER é colocar tudo em maiusculo
+obs: tem outras funções na documentação oficial do postgres
+
+FUNÇÕES DE DATA:
+
+por exemplo, calcular a idade de cada um GROUP BY
+
+antes de calcular a idade, precisa saber da data atual:
+função chamada NOW(): ela trás algumas informações
+
+convertendo para um tipo date 
+
+SELECT (primeiro_nome || ultimo_nome) AS nome_completo, NOW():: DATE, data_nascimento FROM aluno;
+
+para saber o ano podemos fazer:
+
+DATE - data_nascimento
+mas assim vai trazer os dados em formato de dias
+
+para transformar em idade da pessoa é: 
+
+SELECT (primeiro_nome || ultimo_nome) AS nome_completo,
+    (NOW()::DATE - data_nascimento)/365 AS idade
+  FROM aluno;
+
+ou uma forma mais facil de fazer é atraves da função AGE()
+SELECT (primeiro_nome || ultimo_nome) AS nome_completo,
+    AGE(data_nascimento) AS idade
+  FROM aluno;
+essa função retorna o ano, mes e dias, queremos só o ano. tem duas formas: GROUP BY
+
+transformar o campo idade em string e selecionar os dois primeiros caracteres 
+ou usar a função EXTRACT()
+
+SELECT (primeiro_nome || ' ' || ultimo_nome) AS nome_completo, EXTRACT (YEAR FROM AGE(data_nascimento) AS idade)
+FROM aluno;
+
+
+CRIANDO VIEWS:
+
+uma view é só uma tabela virtual, sem permissõ de alterar/remover dados
+nomear uma consulta pra formular relatorios ou fornecer acesso ao banco de dados sem riscos
+
+criar uma views precisa create, view nome_pra_view, as query que vai ser excutada
+EXEMPLO: 
+SELECT * FROM VIEW vw_cursos_por_categoria;
+CREATE VIEW vw_cursos_por_categoria AS SELECT categoria.nome AS categoria,
+    COUNT(curso.id) AS numero_cursos
+    FROM categoria
+    JOIN curso ON curso.categoria_id = categoria.id
+GROUP BY categoria
+pode ter filtros, regras
+pode unir uma tabela com uma VIEW
+--descobrir o id
+SELECT * FROM VIEW vw_cursos_por_categoria JOIN categoria ON categoria.nome =VIEW vw_cursos_por_categoria.categoria;
+
+
+
+MODELAGEM DE DADOS
+
+schemas é como se fosse separação lógica 
+
